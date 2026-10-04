@@ -7,7 +7,7 @@ Statyczna strona gabinetu OzODent w Ozorkowie. Hosting: Vercel (katalog `public/
 - `build.py` – generator wszystkich podstron (szablon, nawigacja, stopka, SEO)
 - `data.py` – cennik i ikony SVG
 - `content.py` – treści podstron usług (opisy, zakres, FAQ)
-- `deploy.sh` – jednorazowy push na GitHub (onluxsll/ozodent) i deploy na Vercel
+- `deploy.sh` – jednorazowy push na GitHub (onluxall/ozodent) i deploy na Vercel
 - `vercel.json` – czyste adresy URL (`/cennik`, `/uslugi/chirurgia`), nagłówki, cache
 
 ## Edycja treści
