@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Generator statycznej strony OzODent -> katalog public/.
 Uruchom: python3 build.py   (wynik commitujemy; Vercel serwuje public/ bez budowania)"""
-import html, os, datetime
+import html, os, datetime, json, re
 from data import PRICES, ICON, TOOTH
 from content import SERVICES
 
@@ -97,14 +97,24 @@ def footer():
 </footer>
 <a class="float-call" href="{TEL_HREF}" aria-label="Zadzwoń: {TEL}">{ICON["phone"]}</a>'''
 
-SCHEMA = f'''<script type="application/ld+json">{{"@context":"https://schema.org","@type":"Dentist","name":"OzODent Centrum Stomatologii",
+SCHEMA = f'''<script type="application/ld+json">{{"@context":"https://schema.org","@type":"Dentist","@id":"{SITE}/#gabinet","name":"OzODent Centrum Stomatologii","alternateName":"OzODent Ozorków","description":"Nowoczesny gabinet stomatologiczny w Ozorkowie – stomatologia zachowawcza i dziecięca, endodoncja, chirurgia stomatologiczna, protetyka, implanty, podcinanie wędzidełek, diagnostyka CBCT.",
 "image":"{SITE}/assets/img/og.jpg","telephone":"+48572555193","email":"{MAIL}","url":"{SITE}",
 "address":{{"@type":"PostalAddress","streetAddress":"ul. Listopadowa 9A","addressLocality":"Ozorków","postalCode":"95-035","addressCountry":"PL"}},
 "openingHoursSpecification":[{{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"08:00","closes":"20:00"}},{{"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"08:00","closes":"14:00"}}],
-"medicalSpecialty":"Dentistry","priceRange":"$$"}}</script>'''
+"areaServed":["Ozorków","Zgierz","Łęczyca","Łódź"],"hasMap":"{MAP_LINK}",
+"employee":{{"@type":"Physician","name":"lek. dent. Małgorzata Pińkowska-Prasał","medicalSpecialty":"Chirurgia stomatologiczna"}},
+"medicalSpecialty":"Dentistry","priceRange":"$$","currenciesAccepted":"PLN"}}</script>'''
 
+_CRUMBS = []
 def page(path, title, desc, active, body, extra_head=""):
+    global _CRUMBS
     url = SITE + ("" if path == "/" else path)
+    if path not in ("/", "/404") and _CRUMBS:
+        items = [{"@type": "ListItem", "position": 1, "name": "Strona główna", "item": SITE + "/"}]
+        for i, (h, l) in enumerate(_CRUMBS, 2):
+            items.append({"@type": "ListItem", "position": i, "name": html.unescape(l), "item": SITE + (h or path)})
+        extra_head += '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": items}, ensure_ascii=False) + "</script>"
+    _CRUMBS = []
     full = title if path == "/" else f"{title} | OzODent Ozorków"
     doc = f'''<!doctype html>
 <html lang="pl">
@@ -142,6 +152,8 @@ def page(path, title, desc, active, body, extra_head=""):
     return path
 
 def page_hero(crumbs, h1, sub, img="korytarz.jpg"):
+    global _CRUMBS
+    _CRUMBS = list(crumbs)
     c = ['<a href="/">Strona główna</a>']
     for href, label in crumbs[:-1]:
         c += ['<span aria-hidden="true">/</span>', f'<a href="{href}">{label}</a>']
@@ -225,12 +237,13 @@ SV = {s["slug"]: s for s in SERVICES}
 specs_html = "".join(
     f'<a class="spec rv" href="/uslugi/{k}"><div class="ic">{ICON[SV[k]["icon"]] if k!="chirurgia" else ICON["implant"]}</div><h3>{"Chirurgia" if k=="chirurgia" else e(SV[k]["name"])}</h3><p>{SHORT[k]}</p></a>' for k in SPECS6)
 
-home = f'''<section class="hero">
-  <div class="hero-bg" role="img" aria-label="Recepcja gabinetu OzODent" style="background-image:url(/assets/img/recepcja.jpg)"></div>
+home = f'''<section class="hero hero-full">
+  <div class="hero-bg"><img src="/assets/img/recepcja.jpg" alt="Recepcja gabinetu stomatologicznego OzODent w Ozorkowie" width="554" height="454" fetchpriority="high"></div>
   <div class="wrap">
     <div class="hero-copy">
+      <p class="eyebrow">Dentysta Ozorków · Centrum Stomatologii</p>
       <h1>Nowoczesna stomatologia <em>dla całej rodziny</em></h1>
-      <p class="lead">Kompleksowa opieka stomatologiczna w nowoczesnym gabinecie wyposażonym w najnowsze technologie.</p>
+      <p class="lead">Kompleksowa opieka stomatologiczna w nowoczesnym gabinecie w Ozorkowie – z diagnostyką CBCT na miejscu i specjalistą chirurgii stomatologicznej.</p>
       <ul class="hero-feats">
         <li><span class="ic">{ICON["tooth"]}</span><div><strong>Nowoczesna diagnostyka</strong>CBCT, OPG, RVG</div></li>
         <li><span class="ic">{ICON["people"]}</span><div><strong>Doświadczenie</strong>i indywidualne podejście</div></li>
@@ -243,14 +256,15 @@ home = f'''<section class="hero">
     </div>
   </div>
   <a class="badge-open" href="/aktualnosci">Otwarcie gabinetu<b>z początkiem listopada 2026</b></a>
+  <a class="scroll-hint" href="#specjalizacje" aria-label="Przewiń do specjalizacji"><span></span></a>
 </section>
 
-<section class="specs">
+<section class="specs" id="specjalizacje">
   <div class="wrap">
     <h2 class="title rv">Nasze specjalizacje</h2>
     <div class="title-rule"></div>
     <div class="spec-grid">{specs_html}</div>
-    <p style="text-align:center;margin:40px 0 0"><a class="more" href="/uslugi">Zobacz wszystkie usługi →</a></p>
+    <p class="also rv">Także: <a href="/uslugi/periodontologia">Periodontologia</a> · <a href="/uslugi/implanty">Implanty</a> · <a href="/uslugi/podcinanie-wedzidelek">Podcinanie wędzidełek</a> · <a href="/uslugi/higienizacja-wybielanie">Higienizacja i wybielanie</a> · <a href="/uslugi/diagnostyka-rtg">Diagnostyka CBCT i OPG</a></p>
   </div>
 </section>
 
@@ -258,59 +272,29 @@ home = f'''<section class="hero">
   <div class="about">
     <div class="rv">
       <h2>O nas</h2>
-      {ABOUT_TXT}
+      <p><b>OzODent Centrum Stomatologii</b> to nowoczesny gabinet w Ozorkowie, stworzony z myślą o komforcie i bezpieczeństwie Pacjentów – prowadzony przez specjalistę chirurgii stomatologicznej z 10-letnim doświadczeniem w tym mieście.</p>
       <div class="sig">Małgorzata Pińkowska-Prasał</div>
       <div class="sig-role">Lek. dent. – specjalista chirurgii stomatologicznej</div>
-      <p style="margin-top:26px"><a class="more" href="/o-nas" style="color:var(--gold-l)">Poznaj nas bliżej →</a></p>
+      <p style="margin-top:26px"><a class="more more-light" href="/o-nas">Poznaj nas bliżej →</a></p>
     </div>
-    <div class="about-img" role="img" aria-label="Zdrowy ząb"></div>
+    <div class="about-img"><img src="/assets/img/zab.jpg" alt="" width="194" height="312" loading="lazy"></div>
   </div>
   <div class="why"><h2 class="rv">Dlaczego my?</h2>{WHY}</div>
 </section>
 
-<section class="promo">
+<section class="promo-band">
   <div class="wrap">
-    <div class="promo-head rv">
-      <div class="eyebrow">Nowe miejsce na mapie Ozorkowa</div>
-      <h2>Promocja <span>na otwarcie gabinetu</span></h2>
-      <div class="title-rule"></div>
-      <p style="margin:22px 0 0;letter-spacing:.3em;text-transform:uppercase;font-size:13px;color:var(--muted)">Z początkiem listopada</p>
+    <div class="pb-head rv">
+      <div class="eyebrow">Promocja na otwarcie gabinetu</div>
+      <h2>Pierwsza wizyta w&nbsp;cenie na start</h2>
+      <p>Trwają zapisy przedwstępne – otwarcie z początkiem listopada.</p>
     </div>
-    <div class="promo-strip rv">Trwają zapisy przedwstępne <a href="{TEL_HREF}">{I("phone")}{TEL}</a></div>
-    {promo_cards()}
-    {VALUES}
-  </div>
-</section>
-
-<section class="feature">
-  <div class="wrap">
-    <div class="rv">
-      <div class="eyebrow">We współpracy z neurologopedą</div>
-      <h2>Podcinanie wędzidełek</h2>
-      <p>U niemowląt, starszych dzieci oraz dorosłych. Zabiegi wykonuje lekarz specjalista chirurgii stomatologicznej – precyzyjnie, delikatnie i z pełnym zrozumieniem potrzeb małego Pacjenta i jego rodziców.</p>
-      <ul class="feature-list">
-        <li><span class="ic">{ICON["baby"]}</span><div><b>Frenotomia</b> u noworodków i niemowląt</div></li>
-        <li><span class="ic">{ICON["brain"]}</span><div><b>W porozumieniu z neurologopedą i logopedą</b> – w ramach prowadzonej terapii</div></li>
-        <li><span class="ic">{ICON["syringe"]}</span><div><b>Możliwość sedacji farmakologicznej</b> przed zabiegiem</div></li>
-      </ul>
-      <a class="btn" href="/uslugi/podcinanie-wedzidelek">Dowiedz się więcej</a>
-    </div>
-    <div class="feature-img rv" role="img" aria-label="Wnętrze gabinetu OzODent">
-      <div class="tag"><small>Lek. dent. · Specjalista chirurgii stomatologicznej</small><strong>Małgorzata Pińkowska-Prasał</strong></div>
-    </div>
-  </div>
-</section>
-
-<section class="section alt">
-  <div class="wrap">
-    <h2 class="title rv">Przejrzysty cennik</h2>
-    <div class="title-rule"></div>
-    <p class="lead-c">Znieczulenie do zabiegów chirurgicznych gratis. Zdjęcia punktowe wykorzystywane w trakcie leczenia gratis.</p>
-    <div class="svc-grid">
-      <a class="svc rv" href="/cennik#chirurgia"><div class="ic">{ICON["implant"]}</div><h3>Chirurgia</h3><p>Konsultacja chirurgiczna 200 zł · usunięcie zęba od 300 zł · ósemki od 500 zł</p><span class="more">Cennik chirurgii →</span></a>
-      <a class="svc rv" href="/cennik#zachowawcza"><div class="ic">{ICON["tooth-fill"]}</div><h3>Stomatologia zachowawcza</h3><p>Wypełnienia od 300 zł · licówki kompozytowe od 600 zł · bonding od 600 zł</p><span class="more">Cennik leczenia →</span></a>
-      <a class="svc rv" href="/cennik#higienizacja"><div class="ic">{ICON["tooth"]}</div><h3>Higienizacja</h3><p>Skaling 200 zł · higienizacja 300–500 zł · wybielanie od 1000 zł</p><span class="more">Cennik higienizacji →</span></a>
-    </div>
+    <ul class="pb-list rv">
+      <li><b>200 zł</b><span>Konsultacja dla dorosłych<br><small>z OPG i kosztorysem</small></span></li>
+      <li><b>150 zł</b><span>Przegląd z ewaluacją ortodontyczną<br><small>dzieci, z OPG</small></span></li>
+      <li><b>80 zł</b><span>Przegląd stomatologiczny<br><small>dla dzieci</small></span></li>
+    </ul>
+    <div class="pb-cta rv"><a class="btn" href="/aktualnosci">Szczegóły promocji</a><a class="more" href="/cennik">Pełny cennik →</a></div>
   </div>
 </section>'''
 pages.append(page("/", "OzODent Centrum Stomatologii – Dentysta Ozorków | Chirurgia stomatologiczna",
@@ -342,9 +326,9 @@ onas = page_hero([("/o-nas", "O nas")], 'Twój uśmiech <em>w najlepszych rękac
     <h2 class="title rv">Nasz gabinet</h2><div class="title-rule"></div>
     <p class="lead-c">Nowoczesne, jasne wnętrza zaprojektowane z myślą o Twoim komforcie.</p>
     <div class="gallery">
-      <div class="rv" style="background-image:url(/assets/img/recepcja.jpg)" role="img" aria-label="Recepcja"></div>
-      <div class="rv" style="background-image:url(/assets/img/korytarz.jpg)" role="img" aria-label="Poczekalnia"></div>
-      <div class="rv" style="background-image:url(/assets/img/gabinet.jpg)" role="img" aria-label="Gabinet"></div>
+      <figure class="rv"><img src="/assets/img/recepcja.jpg" alt="Recepcja OzODent Centrum Stomatologii w Ozorkowie" loading="lazy"></figure>
+      <figure class="rv"><img src="/assets/img/korytarz.jpg" alt="Korytarz i poczekalnia gabinetu OzODent" loading="lazy"></figure>
+      <figure class="rv"><img src="/assets/img/gabinet.jpg" alt="Wnętrze gabinetu stomatologicznego OzODent" loading="lazy"></figure>
     </div>
   </div>
 </section>
@@ -383,8 +367,28 @@ for s in SERVICES:
     if not s["prices"]:
         prices = '<div class="price-block"><h3>Cena</h3><p>Koszt ustalamy indywidualnie po konsultacji i diagnostyce. W promocji na otwarcie konsultacja stomatologiczna z OPG i kosztorysem – <b>200 zł</b>.</p></div>'
     side = "".join(f'<li><a href="/uslugi/{x["slug"]}"{CUR if x is s else ""}>{e(x["name"])}<span>→</span></a></li>' for x in SERVICES)
-    faq_ld = '<script type="application/ld+json">' + __import__("json").dumps({"@context": "https://schema.org", "@type": "FAQPage",
+    faq_ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@type": "FAQPage",
         "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in s["faq"]]}, ensure_ascii=False) + "</script>"
+    idx = SERVICES.index(s)
+    rel = [SERVICES[(idx + k) % len(SERVICES)] for k in (1, 2, 3)]
+    rel_html = "".join(f'<a class="svc rv" href="/uslugi/{x["slug"]}"><div class="ic">{ICON[x["icon"]]}</div><h3>{e(x["name"])}</h3><p>{e(x["short"])}</p><span class="more">Więcej →</span></a>' for x in rel)
+    offers = []
+    for pid in s["prices"]:
+        for t, sub, p in PRICE_BY_ID[pid][2]:
+            nums = [int(n) for n in re.findall(r"\d+", p.replace(" ", ""))]
+            if not nums: continue
+            o = {"@type": "Offer", "name": t, "priceCurrency": "PLN"}
+            if len(nums) == 1 and not p.startswith("od"): o["price"] = nums[0]
+            else:
+                ps = {"@type": "PriceSpecification", "priceCurrency": "PLN", "minPrice": nums[0]}
+                if len(nums) > 1 and "/" not in p: ps["maxPrice"] = nums[-1]
+                o["priceSpecification"] = ps
+            offers.append(o)
+    svc_ld = {"@context": "https://schema.org", "@type": "Service", "name": s["name"] + " Ozorków", "serviceType": s["name"],
+              "description": s["short"], "areaServed": {"@type": "City", "name": "Ozorków"},
+              "provider": {"@id": SITE + "/#gabinet"}, "url": f"{SITE}/uslugi/{s['slug']}"}
+    if offers: svc_ld["offers"] = offers[:20]
+    faq_ld += '<script type="application/ld+json">' + json.dumps(svc_ld, ensure_ascii=False) + "</script>"
     body = page_hero([("/uslugi", "Usługi"), ("", e(s["name"]))], e(s["name"]), e(s["hero"])) + f'''
 <section class="section alt"><div class="wrap cols">
   <article class="prose rv">
@@ -408,6 +412,10 @@ for s in SERVICES:
 <section class="section sand"><div class="wrap">
   <h2 class="title rv">Najczęstsze pytania</h2><div class="title-rule"></div>
   <div class="faq">{faq}</div>
+</div></section>
+<section class="section alt"><div class="wrap">
+  <h2 class="title rv">Zobacz także</h2><div class="title-rule"></div>
+  <div class="svc-grid">{rel_html}</div>
 </div></section>'''
     pages.append(page(f"/uslugi/{s['slug']}", f"{s['name']} Ozorków", f"{s['name']} w OzODent Ozorków – {s['short']} Zapisy: {TEL}.", "uslugi", body, faq_ld))
 
@@ -428,7 +436,7 @@ akt = page_hero([("/aktualnosci", "Aktualności")], 'Aktualności', "Nowości z 
 <section class="section alt"><div class="wrap">
   <div class="news">
     <article class="post rv" id="promocja-na-otwarcie">
-      <div class="post-img" style="background-image:url(/assets/img/recepcja.jpg)" role="img" aria-label="Recepcja OzODent"></div>
+      <div class="post-img"><img src="/assets/img/recepcja.jpg" alt="Recepcja OzODent – promocja na otwarcie gabinetu" loading="lazy"></div>
       <div class="post-body">
         <time datetime="2026-10-01">Październik 2026</time>
         <h2>Promocja na otwarcie gabinetu</h2>
@@ -441,7 +449,7 @@ akt = page_hero([("/aktualnosci", "Aktualności")], 'Aktualności', "Nowości z 
       </div>
     </article>
     <article class="post rv">
-      <div class="post-img" style="background-image:url(/assets/img/gabinet.jpg)" role="img" aria-label="Gabinet OzODent"></div>
+      <div class="post-img"><img src="/assets/img/gabinet.jpg" alt="Nowy gabinet stomatologiczny OzODent w Ozorkowie" loading="lazy"></div>
       <div class="post-body">
         <time datetime="2026-09-15">Wrzesień 2026</time>
         <h2>Nowe miejsce na mapie Ozorkowa</h2>
