@@ -60,6 +60,7 @@ def header(active):
     {logo("h")}
     <nav aria-label="Menu główne"><ul class="menu" id="menu">{"".join(items)}</ul></nav>
     <a class="btn" href="{TEL_HREF}">{I("cal")}Zapisy</a>
+    <a class="hdr-call" href="{TEL_HREF}" aria-label="Zadzwoń: {TEL}">{ICON["phone"]}</a>
     <button class="burger" aria-label="Otwórz menu" aria-expanded="false" aria-controls="menu">{ICON["menu"]}</button>
   </div>
 </header>'''
@@ -116,8 +117,7 @@ def footer():
     <span>© {datetime.date.today().year} OzODent Centrum Stomatologii. Wszystkie prawa zastrzeżone.</span>
     <nav><a href="/polityka-prywatnosci">Polityka prywatności</a></nav>
   </div></div>
-</footer>
-<a class="float-call" href="{TEL_HREF}" aria-label="Zadzwoń: {TEL}">{ICON["phone"]}</a>'''
+</footer>'''
 
 SCHEMA = '<script type="application/ld+json">' + json.dumps({
   "@context": "https://schema.org", "@type": "Dentist", "@id": SITE + "/#gabinet",
@@ -258,7 +258,7 @@ SPECS6 = [("stomatologia-zachowawcza", "Stomatologia zachowawcza", "Leczenie pr�
           ("protetyka", "Protetyka", "Korony, mosty, protezy, odbudowy z bondingiem i estetyką"),
           ("medycyna-estetyczna", "Medycyna estetyczna", "Kwas hialuronowy, botoks, poprawa owalu twarzy")]
 specs_html = "".join(f'<a class="spec rv" href="/uslugi/{k}"><div class="ic">{ICON[SV[k]["icon"]]}</div><h3>{t}</h3><p>{d}</p></a>' for k, t, d in SPECS6)
-also = " · ".join(f'<a href="/uslugi/{k}">{e(SV[k]["name"])}</a>' for k in ["periodontologia", "implanty", "podcinanie-wedzidelek", "higienizacja-wybielanie", "diagnostyka-rtg"])
+also = '<span class="dot" aria-hidden="true">·</span>'.join(f'<a href="/uslugi/{k}">{e(SV[k]["name"])}</a>' for k in ["periodontologia", "implanty", "podcinanie-wedzidelek", "higienizacja-wybielanie", "diagnostyka-rtg"])
 
 home = f'''<section class="hero hero-full">
   <div class="hero-bg"><img src="/assets/img/recepcja.jpg" alt="Recepcja gabinetu stomatologicznego OzODent w Ozorkowie" width="554" height="454" fetchpriority="high"></div>

@@ -2,9 +2,11 @@
   // mobile menu
   var b = document.querySelector('.burger'), m = document.getElementById('menu');
   if (b && m) {
-    b.addEventListener('click', function () { var o = m.classList.toggle('open'); b.setAttribute('aria-expanded', o); });
-    m.addEventListener('click', function (e) { if (e.target.tagName === 'A') { m.classList.remove('open'); b.setAttribute('aria-expanded', false); } });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { m.classList.remove('open'); b.setAttribute('aria-expanded', false); } });
+    function setMenu(o){ m.classList.toggle('open', o); document.body.classList.toggle('menu-open', o); b.setAttribute('aria-expanded', o); b.setAttribute('aria-label', o ? 'Zamknij menu' : 'Otwórz menu'); }
+    b.addEventListener('click', function () { setMenu(!m.classList.contains('open')); });
+    window.addEventListener('resize', function () { if (window.innerWidth > 900) setMenu(false); });
+    m.addEventListener('click', function (e) { if (e.target.tagName === 'A') setMenu(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
   }
 
   // pricing tabs (+ deep link /cennik#chirurgia)
