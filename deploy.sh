@@ -10,8 +10,19 @@ gh auth status >/dev/null 2>&1 || gh auth login -h github.com -w -p https
 
 git add -A && git commit -qm "Update deploy target to onluxall" || true
 
-if git remote get-url origin >/dev/null 2>&1; then
-  git push -u origin main
+URL_GH="https://github.com/$OWNER/$REPO.git"
+if gh repo view "$OWNER/$REPO" >/dev/null 2>&1; then
+  echo "ℹ️  Repo $OWNER/$REPO już istnieje – podłączam i wysyłam."
+  git remote get-url origin >/dev/null 2>&1 && git remote set-url origin "$URL_GH" || git remote add origin "$URL_GH"
+  gh auth setup-git
+  if ! git push -u origin main 2>/dev/null; then
+    echo "ℹ️  Repo ma już inne commity – łączę historię (nasze pliki mają pierwszeństwo, nic nie jest kasowane)."
+    git fetch origin
+    BR=$(gh repo view "$OWNER/$REPO" --json defaultBranchRef -q .defaultBranchRef.name)
+    BR=${BR:-main}
+    git merge "origin/$BR" --allow-unrelated-histories -X ours --no-edit -m "Merge existing $OWNER/$REPO ($BR)"
+    git push -u origin "main:$BR"
+  fi
 else
   gh repo create "$OWNER/$REPO" --public --source . --remote origin --push \
     --description "Strona OzODent Centrum Stomatologii, Ozorków"
