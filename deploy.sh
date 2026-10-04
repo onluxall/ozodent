@@ -8,7 +8,9 @@ V="npx -y vercel@latest"
 command -v gh >/dev/null || { echo "Instaluję GitHub CLI..."; brew install gh; }
 gh auth status >/dev/null 2>&1 || gh auth login -h github.com -w -p https
 
-git add -A && git commit -qm "Update deploy target to onluxall" || true
+rm -f public/regulamin.html   # strona usunięta w wersji v4
+python3 build.py >/dev/null 2>&1 || true
+git add -A && git commit -qm "Aktualizacja strony OzODent" || true
 
 URL_GH="https://github.com/$OWNER/$REPO.git"
 if gh repo view "$OWNER/$REPO" >/dev/null 2>&1; then
