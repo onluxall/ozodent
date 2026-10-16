@@ -20,6 +20,10 @@ MAP_LINK = "https://www.google.com/maps/search/?api=1&query=ul.+Listopadowa+9A+O
 PRICE_BY_ID = {p[0]: p for p in PRICES}
 SV = {s["slug"]: s for s in SERVICES}
 CUR = ' aria-current="page"'
+import hashlib
+def _v(rel):  # cache-busting: /assets są cache'owane 30 dni (vercel.json)
+    return hashlib.md5(open(os.path.join(OUT, rel), "rb").read()).hexdigest()[:8]
+CSS_V, JS_V = _v("assets/css/style.css"), _v("assets/js/main.js")
 
 # ---- dodatkowe, wyraźnie różne ikony (żeby obok siebie nie stały podobne) ----
 ICON.update({
@@ -164,7 +168,7 @@ def page(path, title, desc, active, body, extra_head="", cta_full=False):
 <link rel="manifest" href="/site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Montserrat:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/style.css?v={CSS_V}">
 {SCHEMA}{extra_head}
 </head>
 <body>
@@ -174,7 +178,7 @@ def page(path, title, desc, active, body, extra_head="", cta_full=False):
 </main>
 {cta(cta_full) if path != "/404" else ""}
 {footer()}
-<script src="/assets/js/main.js" defer></script>
+<script src="/assets/js/main.js?v={JS_V}" defer></script>
 </body>
 </html>'''
     fp = os.path.join(OUT, "index.html" if path == "/" else path.strip("/") + ".html")
