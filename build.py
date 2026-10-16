@@ -6,7 +6,7 @@ ZASADA: na stronie są wyłącznie informacje dostarczone przez klienta
 (cenniki, ulotki, makieta). Nie dopisujemy cen ani faktów z głowy."""
 import html, os, datetime, json, re
 from data import PRICES, ICON, TOOTH, svg
-from content import SERVICES, TEAM, PARTNERS, ZL_MPP
+from content import SERVICES, TEAM, PARTNERS, ZL_MPP, REVIEWS, ZL_RATING
 
 e = html.escape
 OUT = "public"
@@ -272,18 +272,24 @@ def avatar(m, cls="avatar"):
 def member_card(m):
     title = f'<small>{e(m["title"])}</small>' if m["title"] else ""
     note = f'<p class="m-note">{e(m["note"])}</p>' if m.get("note") else ""
-    links = "".join(f'<a class="m-link" href="{u}" target="_blank" rel="noopener">{e(l)} →</a>' for l, u in m["links"])
+    links = "".join(f'<a class="m-link" href="{u}" target="_blank" rel="noopener" aria-label="{e(m["name"])} – {e(l)}"><span class="m-src">{e(l)}</span>Zobacz więcej →</a>' for l, u in m["links"])
     bio = "".join(f"<p>{e(p)}</p>" for p in m.get("bio", []))
     bio = f'<div class="m-bio">{bio}</div>' if bio else ""
     return f'''<article class="member rv" id="{m["slug"]}">{avatar(m)}{title}<h3>{e(m["name"])}</h3>
   <p class="m-role">{e(m["role"])}</p>{note}{bio}<div class="m-links">{links}</div></article>'''
 
-def zl_band():
-    return f'''<section class="zl-band"><div class="wrap rv">
-  <div class="zl-ic">{ICON["award"]}</div>
-  <div class="zl-txt"><h2>Opinie naszych Pacjentów</h2>
-  <p>Przeczytaj, co Pacjenci piszą o lek. dent. Małgorzacie Pińkowskiej-Prasał na portalu ZnanyLekarz.</p></div>
-  <a class="btn" href="{ZL_MPP}" target="_blank" rel="noopener">Zobacz opinie na ZnanyLekarz</a>
+MONTHS = ["styczeń","luty","marzec","kwiecień","maj","czerwiec","lipiec","sierpień","wrzesień","październik","listopad","grudzień"]
+STARS = '<span class="stars" aria-label="Ocena 5 na 5">★★★★★</span>'
+
+def zl_band(n=6):
+    avg, cnt, _ = ZL_RATING
+    cards = "".join(f'''<figure class="review rv">{STARS}<blockquote>„{e(t)}”</blockquote>
+  <figcaption><strong>{e(who)}</strong><span>{MONTHS[int(d[5:7])-1]} {d[:4]} · ZnanyLekarz</span></figcaption></figure>''' for who, d, t in REVIEWS[:n])
+    return f'''<section class="reviews"><div class="wrap">
+  <h2 class="title rv">Opinie naszych Pacjentów</h2><div class="title-rule"></div>
+  <p class="rv-sum rv">{STARS}<b>{avg}</b> / 5 · {cnt} opinii o lek. dent. Małgorzacie Pińkowskiej-Prasał na ZnanyLekarz</p>
+  <div class="review-grid">{cards}</div>
+  <p class="center rv"><a class="btn btn-dark" href="{ZL_MPP}" target="_blank" rel="noopener" aria-label="Zobacz więcej opinii na ZnanyLekarz">Zobacz więcej →</a></p>
 </div></section>'''
 
 pages = []
@@ -337,7 +343,7 @@ home = f'''<section class="hero hero-full">
       <p>Kieruję się pasją do chirurgii stomatologicznej i wieloletnim doświadczeniem, które zdobywałam, pracując przez 10 lat w tym mieście.</p>
       <div class="sig">Małgorzata Pińkowska-Prasał</div>
       <div class="sig-role">Lek. dent. – specjalista chirurgii stomatologicznej</div>
-      <p class="about-more"><a class="more more-light" href="/o-nas">Poznaj nas bliżej →</a> &nbsp; <a class="more more-light" href="/zespol">Nasz zespół →</a></p>
+      <p class="about-more"><a class="more more-light" href="/o-nas">Zobacz więcej →</a></p>
     </div>
     <div class="about-img"><img src="/assets/img/zab.jpg" alt="" width="194" height="312" loading="lazy"></div>
   </div>
@@ -350,7 +356,7 @@ home = f'''<section class="hero hero-full">
   </div>
 </section>
 
-{zl_band()}
+{zl_band(3)}
 
 <section class="promo-band">
   <div class="wrap">
@@ -358,7 +364,7 @@ home = f'''<section class="hero hero-full">
       <div class="eyebrow">Wkrótce otwarcie</div>
       <h2>Promocja na otwarcie gabinetu</h2>
       <p>Trwają zapisy przedwstępne.</p>
-      <a class="btn" href="/aktualnosci">Szczegóły promocji</a>
+      <a class="btn" href="/aktualnosci">Zobacz więcej →</a>
     </div>
     <ul class="pb-list rv">
       <li><b>200 zł</b><span>Konsultacja stomatologiczna<br><small>dla dorosłych</small></span></li>
@@ -393,7 +399,7 @@ onas = page_hero([("/o-nas", "O nas")], 'Twój uśmiech <em>w najlepszych rękac
       <p>Moim celem jest kompleksowa opieka stomatologiczna na najwyższym poziomie.</p>
       {boss_bio}
       <div class="sig sig-dark">Małgorzata Pińkowska-Prasał</div>
-      <p><a class="more" href="{ZL_MPP}" target="_blank" rel="noopener">Opinie Pacjentów na ZnanyLekarz →</a></p>
+      <p><a class="more" href="{ZL_MPP}" target="_blank" rel="noopener" aria-label="Opinie Pacjentów na ZnanyLekarz">Zobacz więcej →</a></p>
     </div>
   </div>
 </section>
@@ -410,7 +416,7 @@ onas = page_hero([("/o-nas", "O nas")], 'Twój uśmiech <em>w najlepszych rękac
   <div class="wrap">
     <h2 class="title rv">Nasz zespół</h2><div class="title-rule"></div>
     <div class="mini-grid">{team_teaser}</div>
-    <p class="center rv"><a class="btn btn-dark" href="/zespol">Poznaj nasz zespół</a></p>
+    <p class="center rv"><a class="btn btn-dark" href="/zespol">Zobacz więcej →</a></p>
   </div>
 </section>
 <section class="section sand">
@@ -438,14 +444,14 @@ zespol = page_hero([("/zespol", "Zespół")], 'Poznaj nasz <em>zespół</em>', "
   <h2 class="title rv">Współpracujący logopedzi</h2><div class="title-rule"></div>
   <p class="lead-c rv">Zabiegi podcinania wędzidełek wykonujemy w porozumieniu z neurologopedą i logopedą oraz w ramach prowadzonej terapii.</p>
   <div class="team-grid">{"".join(member_card(m) for m in PARTNERS)}</div>
-  <p class="center rv"><a class="more" href="/uslugi/podcinanie-wedzidelek">Podcinanie wędzidełek – cennik →</a></p>
+  <p class="center rv">Podcinanie wędzidełek – cennik: <a class="more" href="/uslugi/podcinanie-wedzidelek">Zobacz więcej →</a></p>
 </div></section>'''
 pages.append(page("/zespol", "Nasz zespół – lekarze dentyści, higienistka, logopedzi",
      "Zespół OzODent w Ozorkowie: lek. dent. Małgorzata Pińkowska-Prasał (specjalista chirurgii stomatologicznej), lek. dent. Julia Stokowska, higienistka Martyna Dąbrowska oraz współpracujący neurologopedzi.",
      "zespol", zespol))
 
 # ================= USŁUGI =================
-cards = "".join(f'<a class="svc rv" href="/uslugi/{s["slug"]}"><div class="ic">{ICON[s["icon"]]}</div><h3>{e(s["name"])}</h3><p>{e(s["short"])}</p><span class="more">Więcej →</span></a>' for s in SERVICES)
+cards = "".join(f'<a class="svc rv" href="/uslugi/{s["slug"]}"><div class="ic">{ICON[s["icon"]]}</div><h3>{e(s["name"])}</h3><p>{e(s["short"])}</p><span class="more">Zobacz więcej →</span></a>' for s in SERVICES)
 uslugi = page_hero([("/uslugi", "Usługi")], 'Zakres <em>usług</em>', "Diagnostyka · Leczenie · Profilaktyka · Estetyka") + f'''
 <section class="section"><div class="wrap">
   <div class="svc-grid">{cards}</div>
@@ -464,10 +470,10 @@ for s in SERVICES:
     link = ""
     if s.get("link"):
         slug, label = s["link"]
-        link = f'<p class="svc-link rv"><a class="more" href="/uslugi/{slug}">{e(label)} →</a></p>'
+        link = f'<p class="svc-link rv">{e(label)}: <a class="more" href="/uslugi/{slug}">Zobacz więcej →</a></p>'
     idx = SERVICES.index(s)
     rel = [SERVICES[(idx + k) % len(SERVICES)] for k in (1, 2, 3)]
-    rel_html = "".join(f'<a class="svc rv" href="/uslugi/{x["slug"]}"><div class="ic">{ICON[x["icon"]]}</div><h3>{e(x["name"])}</h3><span class="more">Zobacz →</span></a>' for x in rel)
+    rel_html = "".join(f'<a class="svc rv" href="/uslugi/{x["slug"]}"><div class="ic">{ICON[x["icon"]]}</div><h3>{e(x["name"])}</h3><span class="more">Zobacz więcej →</span></a>' for x in rel)
     ld = {"@context": "https://schema.org", "@type": "Service", "name": s["name"] + " Ozorków", "serviceType": s["name"],
           "description": s["short"], "areaServed": {"@type": "City", "name": "Ozorków"},
           "provider": {"@id": SITE + "/#gabinet"}, "url": f"{SITE}/uslugi/{s['slug']}"}
@@ -491,7 +497,7 @@ for s in SERVICES:
 cennik = page_hero([("/cennik", "Cennik")], 'Cennik <em>usług</em>') + f'''
 <section class="pricing"><div class="wrap">
   {price_tabs()}
-  <p class="price-promo rv">Promocja na otwarcie gabinetu: konsultacja dla dorosłych 200 zł · przegląd z ewaluacją ortodontyczną 150 zł · przegląd dla dzieci 80 zł – <a href="/aktualnosci">szczegóły</a></p>
+  <p class="price-promo rv">Promocja na otwarcie gabinetu: konsultacja dla dorosłych 200 zł · przegląd z ewaluacją ortodontyczną 150 zł · przegląd dla dzieci 80 zł – <a href="/aktualnosci">Zobacz więcej →</a></p>
 </div></section>'''
 pages.append(page("/cennik", "Cennik – dentysta Ozorków", "Cennik OzODent Ozorków: stomatologia zachowawcza, chirurgia, periodontologia, podcinanie wędzidełek, higienizacja i wybielanie, RTG i tomografia CBCT.", "cennik", cennik))
 
