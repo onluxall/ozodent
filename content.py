@@ -119,11 +119,11 @@ PARTNERS = [
 # Pomijamy opinie wspominające NFZ lub inny gabinet (Amadent), żeby nie wprowadzać w błąd.
 # ---------------------------------------------------------------------------
 ZL_RATING = ("5,0", 59, "16.10.2026")
-REVIEWS = [
-  ("Katarzyna", "2026-06", "Do Pani Doktor trafiłam z dwumiesięczną córką z polecenia. Córka musiała mieć podcięte wędzidełko językowe. Zabieg odbył się w miłej atmosferze, zostałam poinformowana jak będzie przebiegał, udzielono mi wskazówek jak ćwiczyć z córką po zabiegu. […] Serdecznie polecam Panią Doktor"),
-  ("Magdalena", "2026-05", "Mimo stresu pod jej opieką czuje się spokój i pewność, że wszystko jest pod kontrolą. Widać doświadczenie, brak miejsca na zawahanie, a jednocześnie pełne zaangażowanie i skrupulatność. […] każdy etap leczenia jest jasno tłumaczony."),
-  ("Nikola", "2026-06", "Do Pani doktor trafiłam z okropnym utrudniajacym juz przełykanie sliny bolem ósemki, Pani doktor nie czekala ani chwili zostalam przyjeta expressowo. […] Wizyta u Pani Małgorzaty również zmienila moje nastawienie do stomatologow poniewaz mialam traume. Dziekuje"),
-  ("Ilona", "2026-02", "Byliśmy z córką na podcięciu wędzidełka. Pani Doktor bardzo miła i przyjazna z super podejściem do dzieci. Pani Doktor wykonała zabieg szybko i bezboleśnie a po skończonym zabiegu pokazała jak masować miejsce po zabiegu. Bardzo dziękujemy :)"),
-  ("Aneta", "2026-07", "Pani doktor jest wspaniałym człowiekiem […] zawsze mogłam na nią liczyć jest wspaniałym lekarzem z powołania. Z całego serca dziękujemy za to że Pani doktor w tych ciężkich chwilach była z nami."),
-  ("Angelika", "2025-11", "Byliśmy z Synkiem na podcięciu wędzidełka sam zabieg trwa krótko Pani doktor naprawdę przyjemna i bardzo sympatyczna :) kontakt z Panią doktor przed zabiegiem jaki po był naprawdę bardzo dobry gdybym miała wybierać jeszcze raz wybrałabym Panią doktor. Polecam"),
+REVIEWS = [  # kolejność = priorytet; strona główna pokazuje 5 pierwszych
+  ('Magdalena', '2026-05', 'Mimo stresu pod jej opieką czuje się spokój i pewność, że wszystko jest pod kontrolą. Widać doświadczenie, brak miejsca na zawahanie, a jednocześnie pełne zaangażowanie i skrupulatność. […] każdy etap leczenia jest jasno tłumaczony.'),
+  ('Katarzyna', '2026-06', 'Do Pani Doktor trafiłam z dwumiesięczną córką z polecenia. Córka musiała mieć podcięte wędzidełko językowe. Zabieg odbył się w miłej atmosferze, zostałam poinformowana jak będzie przebiegał, udzielono mi wskazówek jak ćwiczyć z córką po zabiegu. […] Serdecznie polecam Panią Doktor'),
+  ('Nikola', '2026-06', 'Do Pani doktor trafiłam z okropnym utrudniajacym juz przełykanie sliny bolem ósemki, Pani doktor nie czekala ani chwili zostalam przyjeta expressowo. […] Wizyta u Pani Małgorzaty również zmienila moje nastawienie do stomatologow poniewaz mialam traume. Dziekuje'),
+  ('Ilona', '2026-02', 'Byliśmy z córką na podcięciu wędzidełka. Pani Doktor bardzo miła i przyjazna z super podejściem do dzieci. Pani Doktor wykonała zabieg szybko i bezboleśnie a po skończonym zabiegu pokazała jak masować miejsce po zabiegu. Bardzo dziękujemy :)'),
+  ('Angelika', '2025-11', 'Byliśmy z Synkiem na podcięciu wędzidełka sam zabieg trwa krótko Pani doktor naprawdę przyjemna i bardzo sympatyczna :) kontakt z Panią doktor przed zabiegiem jaki po był naprawdę bardzo dobry gdybym miała wybierać jeszcze raz wybrałabym Panią doktor. Polecam'),
+  ('Aneta', '2026-07', 'Pani doktor jest wspaniałym człowiekiem […] zawsze mogłam na nią liczyć jest wspaniałym lekarzem z powołania. Z całego serca dziękujemy za to że Pani doktor w tych ciężkich chwilach była z nami.'),
 ]

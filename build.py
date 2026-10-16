@@ -288,7 +288,7 @@ STARS = '<span class="stars" aria-label="Ocena 5 na 5">★★★★★</span>'
 def zl_band(n=6):
     avg, cnt, _ = ZL_RATING
     cards = "".join(f'''<figure class="review rv">{STARS}<blockquote>„{e(t)}”</blockquote>
-  <figcaption><strong>{e(who)}</strong><span>{MONTHS[int(d[5:7])-1]} {d[:4]} · ZnanyLekarz</span></figcaption></figure>''' for who, d, t in REVIEWS[:n])
+  <figcaption data-i="{e(who[0])}"><div><strong>{e(who)}</strong><span>{MONTHS[int(d[5:7])-1]} {d[:4]} · ZnanyLekarz</span></div></figcaption></figure>''' for who, d, t in REVIEWS[:n])
     return f'''<section class="reviews"><div class="wrap">
   <h2 class="title rv">Opinie naszych Pacjentów</h2><div class="title-rule"></div>
   <p class="rv-sum rv">{STARS}<b>{avg}</b> / 5 · {cnt} opinii o lek. dent. Małgorzacie Pińkowskiej-Prasał na ZnanyLekarz</p>
@@ -360,7 +360,7 @@ home = f'''<section class="hero hero-full">
   </div>
 </section>
 
-{zl_band(3)}
+{zl_band(5)}
 
 <section class="promo-band">
   <div class="wrap">
