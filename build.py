@@ -6,7 +6,7 @@ ZASADA: na stronie są wyłącznie informacje dostarczone przez klienta
 (cenniki, ulotki, makieta). Nie dopisujemy cen ani faktów z głowy."""
 import html, os, datetime, json, re
 from data import PRICES, ICON, TOOTH, svg
-from content import SERVICES
+from content import SERVICES, TEAM, PARTNERS, ZL_MPP
 
 e = html.escape
 OUT = "public"
@@ -35,7 +35,7 @@ ICON.update({
 })
 I = lambda k: f'<span class="i">{ICON[k]}</span>'
 
-NAV = [("home", "/", "Strona główna"), ("o-nas", "/o-nas", "O nas"), ("uslugi", "/uslugi", "Usługi"),
+NAV = [("home", "/", "Strona główna"), ("o-nas", "/o-nas", "O nas"), ("zespol", "/zespol", "Zespół"), ("uslugi", "/uslugi", "Usługi"),
        ("cennik", "/cennik", "Cennik"), ("aktualnosci", "/aktualnosci", "Aktualności"), ("kontakt", "/kontakt", "Kontakt")]
 
 def logo(uid):
@@ -109,6 +109,7 @@ def footer():
         <li><span class="ic">{ICON["phone"]}</span><a href="{TEL_HREF}">{TEL}</a></li>
         <li><span class="ic">{ICON["mail"]}</span><a href="mailto:{MAIL}">{MAIL}</a></li>
         <li><span class="ic">{ICON["pin"]}</span><a href="{MAP_LINK}" target="_blank" rel="noopener">Wyznacz trasę</a></li>
+        <li><span class="ic">{ICON["award"]}</span><a href="{ZL_MPP}" target="_blank" rel="noopener">Opinie na ZnanyLekarz</a></li>
         <li><span class="ic">{ICON["clock"]}</span><span>Pon – Pt: 8:00 – 20:00<br>Sobota: 8:00 – 14:00</span></li>
       </ul>
     </div>
@@ -123,11 +124,15 @@ SCHEMA = '<script type="application/ld+json">' + json.dumps({
   "@context": "https://schema.org", "@type": "Dentist", "@id": SITE + "/#gabinet",
   "name": "OzODent Centrum Stomatologii", "url": SITE, "image": SITE + "/assets/img/og.jpg",
   "telephone": "+48572555193", "email": MAIL,
-  "address": {"@type": "PostalAddress", "streetAddress": "ul. Listopadowa 9A", "addressLocality": "Ozorków", "addressCountry": "PL"},
+  "address": {"@type": "PostalAddress", "streetAddress": "ul. Listopadowa 9A/1", "postalCode": "95-035", "addressLocality": "Ozorków", "addressCountry": "PL"},
   "openingHoursSpecification": [
     {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "08:00", "closes": "20:00"},
     {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "08:00", "closes": "14:00"}],
-  "employee": {"@type": "Physician", "name": "lek. dent. Małgorzata Pińkowska-Prasał", "medicalSpecialty": "Chirurgia stomatologiczna"},
+  "employee": [
+    {"@type": "Physician", "name": "lek. dent. Małgorzata Pińkowska-Prasał", "medicalSpecialty": "Chirurgia stomatologiczna", "sameAs": [ZL_MPP]},
+    {"@type": "Physician", "name": "lek. dent. Julia Stokowska", "medicalSpecialty": "Stomatologia", "sameAs": ["https://www.znanylekarz.pl/profil/julia-stokowska"]},
+    {"@type": "Person", "name": "Martyna Dąbrowska", "jobTitle": "Higienistka stomatologiczna", "sameAs": ["https://www.instagram.com/martynadabrowska.higienistka"]}],
+  "sameAs": [ZL_MPP],
   "hasMap": MAP_LINK, "medicalSpecialty": "Dentistry"}, ensure_ascii=False) + "</script>"
 
 _CRUMBS = []
@@ -248,6 +253,39 @@ def map_block():
   <a class="more" href="{MAP_LINK}" target="_blank" rel="noopener">Otwórz w Google Maps →</a>
 </div></div>'''
 
+def initials(name):
+    return "".join(w[0] for w in name.replace("-", " ").split()[:2]).upper()
+
+def photo_of(m):
+    for ext in ("jpg", "jpeg", "png", "webp"):
+        rel = f"assets/img/zespol/{m['slug']}.{ext}"
+        if os.path.exists(os.path.join(OUT, rel)): return "/" + rel
+    return None
+
+def avatar(m, cls="avatar"):
+    ph = photo_of(m)
+    full = (m["title"] + " " + m["name"]).strip()
+    if ph:
+        return f'<div class="{cls}"><img src="{ph}" alt="{e(full)}" width="300" height="300" loading="lazy"></div>'
+    return f'<div class="{cls} {cls}-ph" aria-hidden="true">{initials(m["name"])}</div>'
+
+def member_card(m):
+    title = f'<small>{e(m["title"])}</small>' if m["title"] else ""
+    note = f'<p class="m-note">{e(m["note"])}</p>' if m.get("note") else ""
+    links = "".join(f'<a class="m-link" href="{u}" target="_blank" rel="noopener">{e(l)} →</a>' for l, u in m["links"])
+    bio = "".join(f"<p>{e(p)}</p>" for p in m.get("bio", []))
+    bio = f'<div class="m-bio">{bio}</div>' if bio else ""
+    return f'''<article class="member rv" id="{m["slug"]}">{avatar(m)}{title}<h3>{e(m["name"])}</h3>
+  <p class="m-role">{e(m["role"])}</p>{note}{bio}<div class="m-links">{links}</div></article>'''
+
+def zl_band():
+    return f'''<section class="zl-band"><div class="wrap rv">
+  <div class="zl-ic">{ICON["award"]}</div>
+  <div class="zl-txt"><h2>Opinie naszych Pacjentów</h2>
+  <p>Przeczytaj, co Pacjenci piszą o lek. dent. Małgorzacie Pińkowskiej-Prasał na portalu ZnanyLekarz.</p></div>
+  <a class="btn" href="{ZL_MPP}" target="_blank" rel="noopener">Zobacz opinie na ZnanyLekarz</a>
+</div></section>'''
+
 pages = []
 
 # ================= STRONA GŁÓWNA (krótko) =================
@@ -261,7 +299,7 @@ specs_html = "".join(f'<a class="spec rv" href="/uslugi/{k}"><div class="ic">{IC
 also = '<span class="dot" aria-hidden="true">·</span>'.join(f'<a href="/uslugi/{k}">{e(SV[k]["name"])}</a>' for k in ["periodontologia", "implanty", "podcinanie-wedzidelek", "higienizacja-wybielanie", "diagnostyka-rtg"])
 
 home = f'''<section class="hero hero-full">
-  <div class="hero-bg"><img src="/assets/img/recepcja.jpg" alt="Recepcja gabinetu stomatologicznego OzODent w Ozorkowie" width="554" height="454" fetchpriority="high"></div>
+  <div class="hero-bg"><img src="/assets/img/korytarz.jpg" alt="Recepcja gabinetu stomatologicznego OzODent w Ozorkowie" width="604" height="330" fetchpriority="high"></div>
   <div class="wrap">
     <div class="hero-copy">
       <p class="eyebrow">Dentysta Ozorków · Centrum Stomatologii</p>
@@ -278,7 +316,7 @@ home = f'''<section class="hero hero-full">
       </div>
     </div>
   </div>
-  <a class="badge-open" href="/aktualnosci">Otwarcie gabinetu<b>z początkiem listopada 2026</b></a>
+  <a class="badge-open" href="{TEL_HREF}">Trwają zapisy<b>przedwstępne – {TEL}</b></a>
   <a class="scroll-hint" href="#specjalizacje" aria-label="Przewiń do specjalizacji"><span></span></a>
 </section>
 
@@ -299,7 +337,7 @@ home = f'''<section class="hero hero-full">
       <p>Kieruję się pasją do chirurgii stomatologicznej i wieloletnim doświadczeniem, które zdobywałam, pracując przez 10 lat w tym mieście.</p>
       <div class="sig">Małgorzata Pińkowska-Prasał</div>
       <div class="sig-role">Lek. dent. – specjalista chirurgii stomatologicznej</div>
-      <p class="about-more"><a class="more more-light" href="/o-nas">Poznaj nas bliżej →</a></p>
+      <p class="about-more"><a class="more more-light" href="/o-nas">Poznaj nas bliżej →</a> &nbsp; <a class="more more-light" href="/zespol">Nasz zespół →</a></p>
     </div>
     <div class="about-img"><img src="/assets/img/zab.jpg" alt="" width="194" height="312" loading="lazy"></div>
   </div>
@@ -312,10 +350,12 @@ home = f'''<section class="hero hero-full">
   </div>
 </section>
 
+{zl_band()}
+
 <section class="promo-band">
   <div class="wrap">
     <div class="pb-head rv">
-      <div class="eyebrow">Z początkiem listopada</div>
+      <div class="eyebrow">Wkrótce otwarcie</div>
       <h2>Promocja na otwarcie gabinetu</h2>
       <p>Trwają zapisy przedwstępne.</p>
       <a class="btn" href="/aktualnosci">Szczegóły promocji</a>
@@ -332,10 +372,16 @@ pages.append(page("/", "OzODent Centrum Stomatologii – Dentysta Ozorków",
      "home", home, cta_full=True))
 
 # ================= O NAS =================
-onas = page_hero([("/o-nas", "O nas")], 'Twój uśmiech <em>w najlepszych rękach</em>', "Nowocześnie. Profesjonalnie. Blisko Ciebie.", "recepcja.jpg") + f'''
+BOSS = TEAM[0]
+boss_bio = "".join(f"<p>{e(p)}</p>" for p in BOSS["bio"])
+boss_bio = f'<h3>Życiorys</h3>{boss_bio}' if boss_bio else ""
+boss_photo = avatar(BOSS, "doc-photo") if photo_of(BOSS) else ""
+team_teaser = "".join(f'<a class="mini rv" href="/zespol#{m["slug"]}">{avatar(m)}<strong>{e(m["name"])}</strong><span>{e(m["role"])}</span></a>' for m in TEAM)
+onas = page_hero([("/o-nas", "O nas")], 'Twój uśmiech <em>w najlepszych rękach</em>', "Nowocześnie. Profesjonalnie. Blisko Ciebie.", "korytarz.jpg") + f'''
 <section class="section alt">
   <div class="wrap doc">
     <div class="doc-card rv">
+      {boss_photo}
       <small>Lek. dent. · Specjalista chirurgii stomatologicznej</small>
       <h2>Małgorzata Pińkowska-Prasał</h2>
       <p>Doświadczenie. Precyzja. Zaufanie.</p>
@@ -345,18 +391,26 @@ onas = page_hero([("/o-nas", "O nas")], 'Twój uśmiech <em>w najlepszych rękac
       <p><b>OzODent Centrum Stomatologii</b> to nowoczesny gabinet w Ozorkowie, stworzony z myślą o komforcie i bezpieczeństwie Pacjentów.</p>
       <p>Kieruję się pasją do chirurgii stomatologicznej i wieloletnim doświadczeniem, które zdobywałam, pracując przez 10 lat w tym mieście.</p>
       <p>Moim celem jest kompleksowa opieka stomatologiczna na najwyższym poziomie.</p>
+      {boss_bio}
       <div class="sig sig-dark">Małgorzata Pińkowska-Prasał</div>
+      <p><a class="more" href="{ZL_MPP}" target="_blank" rel="noopener">Opinie Pacjentów na ZnanyLekarz →</a></p>
     </div>
   </div>
 </section>
 <section class="section">
   <div class="wrap">
     <h2 class="title rv">Nasz gabinet</h2><div class="title-rule"></div>
-    <div class="gallery">
-      <figure class="rv"><img src="/assets/img/recepcja.jpg" alt="Recepcja OzODent Centrum Stomatologii w Ozorkowie" loading="lazy"></figure>
-      <figure class="rv"><img src="/assets/img/korytarz.jpg" alt="Korytarz gabinetu OzODent" loading="lazy"></figure>
+    <div class="gallery g2">
+      <figure class="rv"><img src="/assets/img/korytarz.jpg" alt="Recepcja OzODent Centrum Stomatologii w Ozorkowie" loading="lazy"></figure>
       <figure class="rv"><img src="/assets/img/gabinet.jpg" alt="Wnętrze gabinetu stomatologicznego OzODent" loading="lazy"></figure>
     </div>
+  </div>
+</section>
+<section class="section alt">
+  <div class="wrap">
+    <h2 class="title rv">Nasz zespół</h2><div class="title-rule"></div>
+    <div class="mini-grid">{team_teaser}</div>
+    <p class="center rv"><a class="btn btn-dark" href="/zespol">Poznaj nasz zespół</a></p>
   </div>
 </section>
 <section class="section sand">
@@ -372,6 +426,23 @@ onas = page_hero([("/o-nas", "O nas")], 'Twój uśmiech <em>w najlepszych rękac
 </section>'''
 pages.append(page("/o-nas", "O nas – lek. dent. Małgorzata Pińkowska-Prasał",
      "OzODent Centrum Stomatologii w Ozorkowie – lek. dent. Małgorzata Pińkowska-Prasał, specjalista chirurgii stomatologicznej.", "o-nas", onas))
+
+# ================= ZESPÓŁ =================
+zespol = page_hero([("/zespol", "Zespół")], 'Poznaj nasz <em>zespół</em>', "Lekarze, higienistka i współpracujący neurologopedzi") + f'''
+<section class="section alt"><div class="wrap">
+  <h2 class="title rv">Lekarze i higienistka</h2><div class="title-rule"></div>
+  <div class="team-grid">{"".join(member_card(m) for m in TEAM)}</div>
+</div></section>
+{zl_band()}
+<section class="section"><div class="wrap">
+  <h2 class="title rv">Współpracujący logopedzi</h2><div class="title-rule"></div>
+  <p class="lead-c rv">Zabiegi podcinania wędzidełek wykonujemy w porozumieniu z neurologopedą i logopedą oraz w ramach prowadzonej terapii.</p>
+  <div class="team-grid">{"".join(member_card(m) for m in PARTNERS)}</div>
+  <p class="center rv"><a class="more" href="/uslugi/podcinanie-wedzidelek">Podcinanie wędzidełek – cennik →</a></p>
+</div></section>'''
+pages.append(page("/zespol", "Nasz zespół – lekarze dentyści, higienistka, logopedzi",
+     "Zespół OzODent w Ozorkowie: lek. dent. Małgorzata Pińkowska-Prasał (specjalista chirurgii stomatologicznej), lek. dent. Julia Stokowska, higienistka Martyna Dąbrowska oraz współpracujący neurologopedzi.",
+     "zespol", zespol))
 
 # ================= USŁUGI =================
 cards = "".join(f'<a class="svc rv" href="/uslugi/{s["slug"]}"><div class="ic">{ICON[s["icon"]]}</div><h3>{e(s["name"])}</h3><p>{e(s["short"])}</p><span class="more">Więcej →</span></a>' for s in SERVICES)
@@ -430,7 +501,7 @@ akt = page_hero([("/aktualnosci", "Aktualności")], 'Aktualności', "Nowe miejsc
   <div class="promo-head rv">
     <h2>Promocja <span>na otwarcie gabinetu</span></h2>
     <div class="title-rule"></div>
-    <p class="promo-when">Z początkiem listopada</p>
+    <p class="promo-when">Wkrótce otwarcie</p>
   </div>
   <div class="promo-strip rv">Trwają zapisy przedwstępne <a href="{TEL_HREF}">{I("phone")}{TEL}</a></div>
   {promo_cards()}
@@ -439,7 +510,7 @@ akt = page_hero([("/aktualnosci", "Aktualności")], 'Aktualności', "Nowe miejsc
   <figure class="rv"><img src="/assets/img/gabinet.jpg" alt="Nowy gabinet stomatologiczny OzODent w Ozorkowie" loading="lazy"></figure>
   <div class="prose rv">
     <h2>Nowopowstały, nowoczesny gabinet stomatologiczny</h2>
-    <p>Otwarcie już jesienią 2026 – przy ul. Listopadowej 9A w Ozorkowie (dawny Inkubator, koło Lidla).</p>
+    <p>Już wkrótce otwarcie – przy ul. Listopadowej 9A w Ozorkowie (dawny Inkubator, koło Lidla). Termin otwarcia podamy w Aktualnościach.</p>
     <p>Diagnostyka CBCT i OPG na miejscu. Parking za i przed budynkiem.</p>
   </div>
 </div></section>'''

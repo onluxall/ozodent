@@ -75,3 +75,40 @@ SERVICES = [
     intro=[],
     prices=["rtg"]),
 ]
+
+# ---------------------------------------------------------------------------
+# ZESPÓŁ – sylwetki na /zespol (dane od klientki + profile ZnanyLekarz)
+# Zdjęcia: wrzuć plik do public/assets/img/zespol/<slug>.jpg (kwadrat, min. 400×400)
+#          – build.py sam go wykryje; bez pliku pokazuje się kółko z inicjałami.
+# bio:     lista akapitów (życiorys). Pusta lista = sekcja się nie wyświetla.
+# links:   (etykieta, url)
+# ---------------------------------------------------------------------------
+ZL_MPP = "https://www.znanylekarz.pl/profil/malgorzata-pinkowska-prasal"
+
+TEAM = [
+  dict(slug="malgorzata-pinkowska-prasal", title="lek. dent.", name="Małgorzata Pińkowska-Prasał",
+       role="Specjalista chirurgii stomatologicznej", note="Założycielka OzODent",
+       bio=[],   # <- życiorys od klientki (w drodze)
+       links=[("Opinie na ZnanyLekarz", ZL_MPP)]),
+  dict(slug="julia-stokowska", title="lek. dent.", name="Julia Stokowska",
+       role="Lekarz dentysta", note="PWZ 4555183",
+       bio=[],
+       links=[("Profil na ZnanyLekarz", "https://www.znanylekarz.pl/profil/julia-stokowska")]),
+  dict(slug="martyna-dabrowska", title="", name="Martyna Dąbrowska",
+       role="Higienistka stomatologiczna", note="",
+       bio=[],
+       links=[("Instagram", "https://www.instagram.com/martynadabrowska.higienistka")]),
+]
+
+# Logopedzi / neurologopedzi, z którymi współpracujemy (podcinanie wędzidełek)
+PARTNERS = [
+  dict(slug="natalia-dobierzewska", title="mgr", name="Natalia Dobierzewska",
+       role="Logopeda, neurologopeda, audiofonolog", note="Gabinet logopedyczny – Ozorków",
+       links=[("logopedaozorkow.pl", "https://logopedaozorkow.pl/")]),
+  dict(slug="anna-misztal-szczerbakowicz", title="mgr", name="Anna Misztal-Szczerbakowicz",
+       role="Logopeda, neurologopeda", note="LogomAnia – Gabinet Logopedyczny, Kutno",
+       links=[]),   # <- brak linku od klientki (Facebook: „LogomAnia Kutno – Gabinet Logopedyczny”)
+  dict(slug="katarzyna-kowalewska", title="mgr", name="Katarzyna Kowalewska",
+       role="Neurologopeda – noworodki i niemowlęta", note="Gabinet neuro.logopedki – Włocławek",
+       links=[("Profil na ZnanyLekarz", "https://www.znanylekarz.pl/profil/katarzyna-kowalewska-2")]),
+]

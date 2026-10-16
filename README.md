@@ -17,5 +17,10 @@ Statyczna strona gabinetu OzODent w Ozorkowie. Hosting: Vercel (katalog `public/
 
 Podgląd lokalny: `npx serve public`
 
+## Zespół (/zespol)
+- Dane osób: `content.py` → `TEAM` (lekarze, higienistka) i `PARTNERS` (współpracujący logopedzi).
+- Zdjęcia (kółka): wrzuć `public/assets/img/zespol/<slug>.jpg` (kwadrat, min. 400×400), np. `julia-stokowska.jpg`, i uruchom `python3 build.py` – bez pliku wyświetlają się inicjały.
+- Życiorys: wpisz akapity do `bio=[...]` danej osoby. Życiorys i zdjęcie dr Pińkowskiej-Prasał pokażą się też na /o-nas.
+
 ## Domena
 Po podpięciu domeny (np. ozodent.pl) zmień `SITE` w `build.py` i uruchom `python3 build.py` (canonical, sitemap, og:image).
