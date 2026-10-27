@@ -277,14 +277,31 @@ def avatar(m, cls="avatar"):
         return f'<div class="{cls}"><img src="{ph}" alt="{e(full)}" width="300" height="300" loading="lazy"></div>'
     return f'<div class="{cls} {cls}-ph" aria-hidden="true">{initials(m["name"])}</div>'
 
+def teaser(m, n=170):
+    """Krótki wstęp z pierwszego akapitu życiorysu (do karty na /zespol)."""
+    if not m.get("bio"): return ""
+    t = m["bio"][0]
+    if len(t) <= n: return t
+    cut = t[:n].rsplit(" ", 1)[0].rstrip(",.;:–-")
+    return cut + "…"
+
+def profile_url(m):
+    return f"/zespol/{m['slug']}" if m.get("bio") else f"/zespol#{m['slug']}"
+
 def member_card(m):
     title = f'<small>{e(m["title"])}</small>' if m["title"] else ""
     note = f'<p class="m-note">{e(m["note"])}</p>' if m.get("note") else ""
     links = "".join(f'<a class="m-link" href="{u}" target="_blank" rel="noopener" aria-label="{e(m["name"])} – {e(l)}"><span class="m-src">{e(l)}</span>Zobacz więcej →</a>' for l, u in m["links"])
-    bio = "".join(f"<p>{e(p)}</p>" for p in m.get("bio", []))
-    bio = f'<div class="m-bio">{bio}</div>' if bio else ""
-    return f'''<article class="member rv" id="{m["slug"]}">{avatar(m)}{title}<h3>{e(m["name"])}</h3>
-  <p class="m-role">{e(m["role"])}</p>{note}{bio}<div class="m-links">{links}</div></article>'''
+    if m.get("bio"):
+        url = profile_url(m)
+        bio = f'<p class="m-teaser">{e(teaser(m))}</p><a class="m-more" href="{url}" aria-label="Przeczytaj cały życiorys: {e(m["name"])}">Czytaj więcej →</a>'
+        head = f'<a class="m-head" href="{url}">{avatar(m)}{title}<h3>{e(m["name"])}</h3></a>'
+    else:
+        bio = ""
+        head = f'{avatar(m)}{title}<h3>{e(m["name"])}</h3>'
+    linkbox = f'<div class="m-links">{links}</div>' if links else ""
+    return f'''<article class="member rv" id="{m["slug"]}">{head}
+  <p class="m-role">{e(m["role"])}</p>{note}{bio}{linkbox}</article>'''
 
 MONTHS = ["styczeń","luty","marzec","kwiecień","maj","czerwiec","lipiec","sierpień","wrzesień","październik","listopad","grudzień"]
 STARS = '<span class="stars" aria-label="Ocena 5 na 5">★★★★★</span>'
@@ -390,7 +407,7 @@ BOSS = TEAM[0]
 boss_bio = "".join(f"<p>{e(p)}</p>" for p in BOSS["bio"])
 boss_bio = f'<h3>Życiorys</h3>{boss_bio}' if boss_bio else ""
 boss_photo = avatar(BOSS, "doc-photo") if photo_of(BOSS) else ""
-team_teaser = "".join(f'<a class="mini rv" href="/zespol#{m["slug"]}">{avatar(m)}<strong>{e(m["name"])}</strong><span>{e(m["role"])}</span></a>' for m in TEAM)
+team_teaser = "".join(f'<a class="mini rv" href="{profile_url(m)}">{avatar(m)}<strong>{e(m["name"])}</strong><span>{e(m["role"])}</span></a>' for m in TEAM)
 onas = page_hero([("/o-nas", "O nas")], 'Twój uśmiech <em>w najlepszych rękach</em>', "Nowocześnie. Profesjonalnie. Blisko Ciebie.", "korytarz.jpg") + f'''
 <section class="section alt">
   <div class="wrap doc">
@@ -457,6 +474,44 @@ zespol = page_hero([("/zespol", "Zespół")], 'Poznaj nasz <em>zespół</em>', "
 pages.append(page("/zespol", "Nasz zespół – lekarze dentyści, higienistki, logopedzi",
      "Zespół OzODent w Ozorkowie: lek. dent. Małgorzata Pińkowska-Prasał (specjalista chirurgii stomatologicznej), lek. dent. Julia Stokowska, lek. dent. Marcelina Malinowska, lek. dent. Barbara Ziąber, lek. dent. Agnieszka Władysiak, higienistki Martyna Dąbrowska i Aleksandra Szewczyk oraz współpracujący neurologopedzi.",
      "zespol", zespol))
+
+# ================= PROFILE ZESPOŁU (/zespol/<slug>) =================
+for m in TEAM:
+    if not m.get("bio"): continue
+    full = (m["title"] + " " + m["name"]).strip()
+    bio = "".join(f"<p>{e(p)}</p>" for p in m["bio"])
+    note = f'<p class="p-note">{e(m["note"])}</p>' if m.get("note") else ""
+    links = "".join(f'<a class="m-link" href="{u}" target="_blank" rel="noopener"><span class="m-src">{e(l)}</span>Zobacz więcej →</a>' for l, u in m["links"])
+    links = f'<div class="m-links">{links}</div>' if links else ""
+    others = "".join(f'<a class="mini rv" href="{profile_url(x)}">{avatar(x)}<strong>{e(x["name"])}</strong><span>{e(x["role"])}</span></a>' for x in TEAM if x is not m)
+    title_small = f'<small>{e(m["title"])}</small>' if m["title"] else ""
+    body = page_hero([("/zespol", "Zespół"), ("", e(m["name"]))], e(m["name"]), e(m["role"])) + f'''
+<section class="section alt"><div class="wrap profile">
+  <aside class="p-card rv">
+    {avatar(m, "p-photo")}
+    {title_small}
+    <h2>{e(m["name"])}</h2>
+    <p class="p-role">{e(m["role"])}</p>{note}
+    {links}
+    <a class="btn btn-dark p-cta" href="{TEL_HREF}">{I("cal")}Umów wizytę</a>
+  </aside>
+  <div class="prose p-bio rv">
+    <h2>Poznajmy się</h2>
+    {bio}
+    <p><a class="more" href="/zespol">← Cały zespół</a></p>
+  </div>
+</div></section>
+<section class="section"><div class="wrap">
+  <h2 class="title rv">Pozostali członkowie zespołu</h2><div class="title-rule"></div>
+  <div class="mini-grid">{others}</div>
+</div></section>'''
+    person = {"@context": "https://schema.org", "@type": "Physician" if m["title"] else "Person", "name": full,
+              "description": m["role"], "worksFor": {"@id": SITE + "/#gabinet"}, "url": f"{SITE}/zespol/{m['slug']}"}
+    if photo_of(m): person["image"] = SITE + photo_of(m)
+    if m["links"]: person["sameAs"] = [u for _, u in m["links"]]
+    extra = '<script type="application/ld+json">' + json.dumps(person, ensure_ascii=False) + "</script>"
+    desc = (teaser(m, 150) + " OzODent Ozorków.").replace("….", "…")
+    pages.append(page(f"/zespol/{m['slug']}", f"{full} – {m['role']}", desc, "zespol", body, extra))
 
 # ================= USŁUGI =================
 cards = "".join(f'<a class="svc rv" href="/uslugi/{s["slug"]}"><div class="ic">{ICON[s["icon"]]}</div><h3>{e(s["name"])}</h3><p>{e(s["short"])}</p><span class="more">Zobacz więcej →</span></a>' for s in SERVICES)

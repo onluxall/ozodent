@@ -742,3 +742,24 @@ a.spec:hover h3{color:var(--gold-d)}
 @media (max-width:900px){.review{flex-basis:calc((100% - 26px)/2)}}
 @media (max-width:600px){.review{flex-basis:100%}}
 @media (prefers-reduced-motion:reduce){.review:hover,.js .review.rv.in:hover{transform:none}}
+
+/* ---- Zespół: skrócone karty + podstrony profili ---- */
+.m-head{display:flex;flex-direction:column;align-items:center;color:inherit;text-decoration:none}
+.m-head:hover h3{color:var(--gold-d)}
+.m-head:hover .avatar{border-color:var(--gold)}
+.m-teaser{margin:16px 0 0;font-size:14.5px;line-height:1.7;color:var(--muted);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.m-more{margin-top:14px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);border-bottom:1px solid var(--gold);padding-bottom:3px;transition:color .2s}
+.m-more:hover{color:var(--gold-d)}
+.profile{display:grid;grid-template-columns:340px 1fr;gap:56px;align-items:start}
+.p-card{position:sticky;top:110px;display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:40px 28px 32px}
+.p-photo{width:220px;height:220px;border-radius:50%;overflow:hidden;margin-bottom:22px;border:3px solid var(--gold-l);box-shadow:0 0 0 7px #fff,0 0 0 8px var(--line);background:var(--sand)}
+.p-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.p-photo.p-photo-ph{display:grid;place-items:center;font-family:var(--serif);font-size:64px;color:var(--gold-d)}
+.p-card small{color:var(--gold-d);letter-spacing:.14em;text-transform:uppercase;font-size:11.5px;font-weight:600}
+.p-card h2{font-size:28px;margin:6px 0 8px}
+.p-role{margin:0;font-weight:500}
+.p-note{margin:6px 0 0;color:var(--muted);font-size:13.5px}
+.p-card .m-links{margin-top:0;padding-top:18px}
+.p-cta{margin-top:22px}
+.p-bio{max-width:68ch}
+@media (max-width:900px){.profile{grid-template-columns:1fr;gap:36px}.p-card{position:static}}
