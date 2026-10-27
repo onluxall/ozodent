@@ -135,7 +135,11 @@ SCHEMA = '<script type="application/ld+json">' + json.dumps({
   "employee": [
     {"@type": "Physician", "name": "lek. dent. Małgorzata Pińkowska-Prasał", "medicalSpecialty": "Chirurgia stomatologiczna", "sameAs": [ZL_MPP]},
     {"@type": "Physician", "name": "lek. dent. Julia Stokowska", "medicalSpecialty": "Stomatologia", "sameAs": ["https://www.znanylekarz.pl/profil/julia-stokowska"]},
-    {"@type": "Person", "name": "Martyna Dąbrowska", "jobTitle": "Higienistka stomatologiczna", "sameAs": ["https://www.instagram.com/martynadabrowska.higienistka"]}],
+    {"@type": "Physician", "name": "lek. dent. Marcelina Malinowska", "medicalSpecialty": "Stomatologia, medycyna estetyczna"},
+    {"@type": "Physician", "name": "lek. dent. Barbara Ziąber", "medicalSpecialty": "Stomatologia"},
+    {"@type": "Physician", "name": "lek. dent. Agnieszka Władysiak", "medicalSpecialty": "Endodoncja"},
+    {"@type": "Person", "name": "Martyna Dąbrowska", "jobTitle": "Higienistka stomatologiczna", "sameAs": ["https://www.instagram.com/martynadabrowska.higienistka"]},
+    {"@type": "Person", "name": "Aleksandra Szewczyk", "jobTitle": "Higienistka stomatologiczna"}],
   "sameAs": [ZL_MPP],
   "hasMap": MAP_LINK, "medicalSpecialty": "Dentistry"}, ensure_ascii=False) + "</script>"
 
@@ -438,9 +442,9 @@ pages.append(page("/o-nas", "O nas – lek. dent. Małgorzata Pińkowska-Prasał
      "OzODent Centrum Stomatologii w Ozorkowie – lek. dent. Małgorzata Pińkowska-Prasał, specjalista chirurgii stomatologicznej.", "o-nas", onas))
 
 # ================= ZESPÓŁ =================
-zespol = page_hero([("/zespol", "Zespół")], 'Poznaj nasz <em>zespół</em>', "Lekarze, higienistka i współpracujący neurologopedzi") + f'''
+zespol = page_hero([("/zespol", "Zespół")], 'Poznaj nasz <em>zespół</em>', "Lekarze dentyści, higienistki i współpracujący neurologopedzi") + f'''
 <section class="section alt"><div class="wrap">
-  <h2 class="title rv">Lekarze i higienistka</h2><div class="title-rule"></div>
+  <h2 class="title rv">Lekarze i higienistki</h2><div class="title-rule"></div>
   <div class="team-grid">{"".join(member_card(m) for m in TEAM)}</div>
 </div></section>
 {zl_band()}
@@ -450,8 +454,8 @@ zespol = page_hero([("/zespol", "Zespół")], 'Poznaj nasz <em>zespół</em>', "
   <div class="team-grid">{"".join(member_card(m) for m in PARTNERS)}</div>
   <p class="center rv">Podcinanie wędzidełek – cennik: <a class="more" href="/uslugi/podcinanie-wedzidelek">Zobacz więcej →</a></p>
 </div></section>'''
-pages.append(page("/zespol", "Nasz zespół – lekarze dentyści, higienistka, logopedzi",
-     "Zespół OzODent w Ozorkowie: lek. dent. Małgorzata Pińkowska-Prasał (specjalista chirurgii stomatologicznej), lek. dent. Julia Stokowska, higienistka Martyna Dąbrowska oraz współpracujący neurologopedzi.",
+pages.append(page("/zespol", "Nasz zespół – lekarze dentyści, higienistki, logopedzi",
+     "Zespół OzODent w Ozorkowie: lek. dent. Małgorzata Pińkowska-Prasał (specjalista chirurgii stomatologicznej), lek. dent. Julia Stokowska, lek. dent. Marcelina Malinowska, lek. dent. Barbara Ziąber, lek. dent. Agnieszka Władysiak, higienistki Martyna Dąbrowska i Aleksandra Szewczyk oraz współpracujący neurologopedzi.",
      "zespol", zespol))
 
 # ================= USŁUGI =================
